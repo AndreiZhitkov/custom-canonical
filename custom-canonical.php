@@ -2,7 +2,7 @@
 /*
 Plugin Name: Custom canonical URL for Yoast SEO
 Plugin URI:  https://github.com/AndreiZhitkov/custom-canonical
-Description: Set default custom canonical URL for Yoast SEO. The setting is found in Settings -> General.
+Description: Set default custom canonical URL for Yoast SEO. The setting is in Settings -> General.
 Version:     1.0
 Author:      Andrei Zhitkov
 Author URI:  https://github.com/AndreiZhitkov
@@ -14,6 +14,7 @@ Domain Path: /languages
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+// check if Yoast SEO is installed and active
 function customcanonical_discover_yoast() {
 	$customcanonical_yoast = FALSE;
 		if ( is_plugin_active( 'wordpress-seo/wp-seo.php' ) ) {
@@ -22,16 +23,18 @@ function customcanonical_discover_yoast() {
 	return $customcanonical_yoast;
 }
 
-function admin_notice_noyoast() { ?>
+// prepare admin notification if Yoast SEO is not active
+function customcanonical_admin_notice_noyoast() { ?>
     <div class="notice notice-error">
     <p><?php _e( '<strong>Custom canonical URL:</strong> Yoast SEO is not active', 'customcanonical' ); ?></p>
     </div>
 <?php }
 
+// deactivate if Yoast SEO is inactive, show admin notice, else set up all the params
 function customcanonical_init () {
 	if ( customcanonical_discover_yoast() == FALSE ) {
-		add_action( 'admin_notices', 'admin_notice_noyoast');
-		deactivate_plugins( plugin_basename( __FILE__ ) );
+		add_action( 'admin_notices', 'customcanonical_admin_notice_noyoast');
+		deactivate_plugins( custom-canonical( custom-canonical.php ) );
 	} else {
 		add_settings_section(
 		'customcanonical_setting_section',
@@ -57,10 +60,10 @@ function customcanonical_init () {
 add_action( 'admin_init', 'customcanonical_init' );
 
 /* load text domain for this plugin | it will not load properly without add_action() */
-function load_customcanonical_textdomain () {
-		load_plugin_textdomain('customcanonical', false, basename( dirname( __FILE__ ) ) . '/languages/' );
+function customcanonical_load_textdomain () {
+		load_plugin_textdomain('custom-canonical', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 }
-add_action( 'plugins_loaded', 'load_customcanonical_textdomain' );
+add_action( 'plugins_loaded', 'customcanonical_load_textdomain' );
 
 /* all is good to go */
 /* adminirtative interface */
@@ -76,7 +79,7 @@ function customcanonical_setting_callback () {
 
 apply_filters( 'sanitize_option_customcanonical_url', 'customcanonical_url', 'customcanonical_url' );
 
-/*
+/* Attribution:
 * Plugin Name: WPSE WPSEO Canonical
 * Plugin URI: http://wordpress.stackexchange.com
 * Description: Changes canonical url domain.
@@ -85,17 +88,21 @@ apply_filters( 'sanitize_option_customcanonical_url', 'customcanonical_url', 'cu
 * Author URI: http://developerpage.net
 **/
 
-$domain = get_option('customcanonical_url', '');
+// check if all is configured - the URL is set and in WP options database
+$customcanonical_domain = get_option('customcanonical_url', '');
+
+// substitute URL for the custom canonical here
 function customcanonical_domain_replace ($url){
-	global $domain;
+	global $customcanonical_domain;
 	$parsed = parse_url(home_url());
 	$current_site_domain = $parsed['host'];
-	return str_replace($current_site_domain, $domain, $url);
+	return str_replace($current_site_domain, $customcanonical_domain, $url);
 }
 
+// do noting if the cusom canonical URL is not actually sonfigured yet
 function customcanonical_domain_set () {
-	global $domain;
-		if ( empty( $domain )) {
+	global $customcanonical_domain;
+		if ( empty( $customcanonical_domain )) {
 			return;
 		} else {
 			add_filter('wpseo_canonical', 'customcanonical_domain_replace');
