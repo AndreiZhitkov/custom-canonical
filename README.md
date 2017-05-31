@@ -1,6 +1,5 @@
-# custom-canonical
-WordPress plugin: Default custom canonical URL for Yoast SEO
 === Custom canonical URL for Yoast SEO ===
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XDRGMW2YBWPGQ
 Tags: SEO, Yoast, canonical
 Requires at least: 4.x
 Tested up to: 4.7.5
